@@ -74,15 +74,16 @@ def train_second_predict(model, filename):
 def start_predict(model, last_window, last_window_raw, filename, model_state):
 	# Predict next time stamp
 	print model_state
+	"""
 	if not model_state:
 		print "not first predict"
 		model, last_window, last_window_raw = train_second_predict(model, filename)
 		a = np.squeeze(np.asarray(last_window_raw))
 		print a
 		print "last_window", last_window_raw[len(last_window_raw) - 1]
-
+"""
 	next_timestamp = build_model.predict_next_timestamp(model, last_window)
-	print "next_timestamp", next_timestamp[0]+[1]
+	print "next_timestamp", next_timestamp
 	next_timestamp_raw = (next_timestamp[0] + 1) * last_window_raw
 	return format(next_timestamp_raw)
 
