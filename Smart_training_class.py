@@ -15,7 +15,7 @@ class SmartTraining(AtomicDEVS):
         self.isModelTrain = False
         self.new_entry = 0
         self.outport = self.addOutPort("outport")
-        self.inport = self.addInPort("inport")
+        self.inport = self.addInPort("IN")
 
     def intTransition(self):
         # Internal Transition Function
