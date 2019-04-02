@@ -12,15 +12,13 @@ class System(CoupledDEVS):
         # Load command line arguments
         train_file = './data/weather_ajaccio.csv'
 
-        algo_name = "LSTM"
-
         self.models = []
         # First model
-        self.models.append(self.addSubModel(SmartTraining("_SmartTraining", algo_name, train_file)))
+        self.models.append(self.addSubModel(SmartTraining("_SmartTraining", train_file)))
         # Second model
-        self.models.append(self.addSubModel(SmartPredict("_SmartPredict", algo_name)))
+        self.models.append(self.addSubModel(SmartPredict("_SmartPredict")))
         # Third model
-        self.models.append(self.addSubModel(SmartTransition("_SmartTransition", algo_name)))
+        self.models.append(self.addSubModel(SmartTransition("_SmartTransition")))
         # And connect them
         self.connectPorts(self.models[0].outport, self.models[1].inport)
         self.connectPorts(self.models[1].outport, self.models[2].inport)

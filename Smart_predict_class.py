@@ -7,15 +7,14 @@ class SmartPredict(AtomicDEVS):
     """
     Predict class
     """
-    def __init__(self, name, algo_name):
+    def __init__(self, name):
         AtomicDEVS.__init__(self, name)
         self.name = name
-        self.algo_name = algo_name
         self.state = State.waiting
         self.csv_reader = CsvReader()
         self.file_name = "./data/weather_ajaccio.csv"
         self.is_model_train = False
-        self.is_first_predict = True
+        self.is_first_train = True
         self.prediction = 0
         self.dict_data = {}
         self.inport = self.addInPort("inport")
@@ -43,15 +42,15 @@ class SmartPredict(AtomicDEVS):
         if self.state == State.working:
             last_temp = self.csv_reader.get_last_raw_temperature(self.file_name)
             last_row = self.csv_reader.get_last_row(self.file_name)
-            print last_row
+            print "last_row", last_row
             self.prediction = plstmc.start_predict(self.dict_data.get("model"), self.dict_data.get("last_window"),
-                                                   last_temp, self.file_name, self.is_first_predict)
+                                                   last_temp, self.file_name, self.is_first_train)
+            self.is_first_train = False
             self.prediction = float(self.prediction)
             self.prediction = int(self.prediction)
-            self.is_first_predict = False
-            return {self.outport: [self.prediction, self.is_model_train]}
+            return {self.outport: [("prediction", self.prediction), ("isTrain", self.is_model_train)]}
         else:
-            return {self.outport: [State.waiting]}
+            return {self.outport: [("isTrain", self.is_model_train), ("State", State.waiting)]}
 
     def timeAdvance(self):
         return 1.0

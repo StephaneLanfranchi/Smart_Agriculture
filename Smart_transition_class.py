@@ -7,17 +7,16 @@ class SmartTransition(AtomicDEVS):
     """
     Transition class when train and predict end class
     """
-    def __init__(self, name, algo_name):
+    def __init__(self, name):
         AtomicDEVS.__init__(self, name)
         self.name = name
         self.state = State.waiting
-        self.algo_name = algo_name
-        self.isModelTrain = False
+        self.is_model_train = False
         self.writer = Writer()
         self.csv_reader = CsvReader()
         self.date_converter = DateConverter()
         self.prediction = 0
-        self.predict_data = []
+        self.dict_data = {}
         self.file_name = self.writer.set_file_to_write("./data/weather_ajaccio.csv")
         self.inport = self.addInPort("inport")
         self.outport = self.addOutPort("outport")
@@ -26,16 +25,17 @@ class SmartTransition(AtomicDEVS):
         # Internal retrieve data Function.
         if len(inputs[self.inport]) >= 2:
             for value in inputs[self.inport]:
-                self.predict_data.append(value)
-            self.prediction = self.predict_data[0]
-            self.isModelTrain = self.predict_data[1]
+                self.dict_data[value[0]] = value[1]
+            self.is_model_train = self.dict_data.get("isTrain")
+
+        if self.is_model_train:
             return State.working
         else:
             return State.waiting
 
     def intTransition(self):
         # Internal Transition Function
-        if self.isModelTrain:
+        if self.is_model_train:
             return State.working
         else:
             return State.waiting
@@ -46,7 +46,8 @@ class SmartTransition(AtomicDEVS):
             last_date = self.csv_reader.get_last_raw_date("./data/weather_ajaccio.csv")
             last_date = self.date_converter.convert_to_datetime(last_date)
             next_date = self.date_converter.get_next_day(last_date)
-            self.writer.write_predict(next_date, self.prediction, self.file_name)
+            print "la prediction", self.dict_data.get("prediction")
+            self.writer.write_predict(next_date, self.dict_data.get("prediction"), self.file_name)
             return {self.outport: [self.prediction]}
         else:
             return {self.outport: [State.waiting]}
