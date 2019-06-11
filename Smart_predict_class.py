@@ -27,8 +27,6 @@ class SmartPredict(AtomicDEVS):
             self.dict_data[values[0]] = values[1]
         self.is_model_train = self.dict_data.get("isTrain")
 
-        print("model", self.dict_data.get("model"))
-
         if self.is_model_train:
             return State.working
         else:
@@ -37,21 +35,20 @@ class SmartPredict(AtomicDEVS):
     def intTransition(self):
         # Internal Transition Function
         if self.is_model_train:
-            return State.working
+            last_temp = self.csv_reader.get_last_raw_temperature(self.file_name)
+            last_row = self.csv_reader.get_last_row(self.file_name)
+            self.prediction = start_predict(self.dict_data.get("model"), self.dict_data.get("last_window"),
+                                            last_temp, self.file_name, self.is_first_train)
+            self.is_first_train = False
+            self.prediction = float(self.prediction)
+            self.prediction = int(self.prediction)
+            return {self.outport: [("prediction", self.prediction), ("isTrain", self.is_model_train)]}
         else:
             return State.waiting
 
     def outputFnc(self):
         # Send the amount of messages sent on the output port
-        if self.state == State.working:
-            last_temp = self.csv_reader.get_last_raw_temperature(self.file_name)
-            last_row = self.csv_reader.get_last_row(self.file_name)
-            print "last_row", last_row
-            self.prediction = start_predict(self.dict_data.get("model"), self.dict_data.get("last_window"),
-                                                   last_temp, self.file_name, self.is_first_train)
-            self.is_first_train = False
-            self.prediction = float(self.prediction)
-            self.prediction = int(self.prediction)
+        if self.is_model_train:
             return {self.outport: [("prediction", self.prediction), ("isTrain", self.is_model_train)]}
         else:
             return {self.outport: [("isTrain", self.is_model_train), ("State", State.waiting)]}

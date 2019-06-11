@@ -36,18 +36,16 @@ class SmartTransition(AtomicDEVS):
     def intTransition(self):
         # Internal Transition Function
         if self.is_model_train:
-            return State.working
+            last_date = self.csv_reader.get_last_raw_date("./data/weather_ajaccio.csv")
+            last_date = self.date_converter.convert_to_datetime(last_date)
+            next_date = self.date_converter.get_next_day(last_date)
+            self.writer.write_predict(next_date, self.dict_data.get("prediction"), self.file_name)
         else:
             return State.waiting
 
     def outputFnc(self):
         # Send the amount of messages sent on the output port
-        if self.state == State.working:
-            last_date = self.csv_reader.get_last_raw_date("./data/weather_ajaccio.csv")
-            last_date = self.date_converter.convert_to_datetime(last_date)
-            next_date = self.date_converter.get_next_day(last_date)
-            print "la prediction", self.dict_data.get("prediction")
-            self.writer.write_predict(next_date, self.dict_data.get("prediction"), self.file_name)
+        if self.is_model_train:
             return {self.outport: [self.prediction]}
         else:
             return {self.outport: [State.waiting]}
