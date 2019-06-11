@@ -25,16 +25,16 @@ class System(CoupledDEVS):
         self.connectPorts(self.models[2].outport, self.models[0].inport)
 
 
+
 print("Start Simulation")
 
 smartSystem = System(name="SmartAgriculture")
 sim = Simulator(smartSystem)
 sim.setDSDEVS(True)
-sim.setTerminationTime(10.0)
+sim.setTerminationTime(8)
 sim.setVerbose(None)
 sim.simulate()
 
 print("Simulation terminated with _SmartTraining in state %s" % smartSystem.models[0].state)
 print("Simulation terminated with _SmartPredict in state %s" % smartSystem.models[1].state)
 print("Simulation terminated with _SmartTransition in state %s" % smartSystem.models[2].state)
-#print("Simulation terminated with prediction : %s" % smartSystem.models[2].list_prediction)

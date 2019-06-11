@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import csv
+import random
 
 class Timer:
 
@@ -72,3 +73,31 @@ class DateConverter:
 	def get_next_day(self, actual_date):
 		actual_date += timedelta(days=1)
 		return actual_date
+
+
+class DateGenerator:
+
+	def generator(self, numberOfDate):
+		reader = CsvReader()
+		converter = DateConverter()
+		writer = Writer()
+		filename = "./data/weather_ajaccio.csv"
+		last_row_date = reader.get_last_raw_date(filename)
+		last_row_date_to_data = converter.convert_to_datetime(last_row_date)
+		next_date = converter.get_next_day(last_row_date_to_data)
+		last_row_temp = reader.get_last_raw_temperature(filename)
+		for x in range(numberOfDate):
+			if next_date.month == 1 or next_date.month == 2 or next_date.month == 3:
+				random_plus_temp = random.randint(-15, 0)
+			elif next_date.month == 4 or next_date.month == 5:
+				random_plus_temp = random.randint(-2, 2)
+			elif next_date.month == 6 or next_date.month == 7 or next_date.month == 8:
+				random_plus_temp = random.randint(4, 15)
+			elif next_date.month == 9 or next_date.month == 10:
+				random_plus_temp = random.randint(-4, 4)
+			else:
+				random_plus_temp = random.randint(-8, 2)
+
+			temp = last_row_temp + random_plus_temp
+			writer.write_predict(next_date,temp,filename)
+			next_date = converter.get_next_day(next_date)

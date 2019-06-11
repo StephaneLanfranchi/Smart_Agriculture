@@ -1,7 +1,8 @@
 from pypdevs.DEVS import AtomicDEVS
 import Statement as State
-import Predict_LSTM_class as plstmc
 from Utils import CsvReader
+import numpy as np
+
 
 class SmartPredict(AtomicDEVS):
     """
@@ -22,8 +23,11 @@ class SmartPredict(AtomicDEVS):
 
     def extTransition(self, inputs):
         for values in inputs[self.inport]:
+            print(values)
             self.dict_data[values[0]] = values[1]
         self.is_model_train = self.dict_data.get("isTrain")
+
+        print("model", self.dict_data.get("model"))
 
         if self.is_model_train:
             return State.working
@@ -43,7 +47,7 @@ class SmartPredict(AtomicDEVS):
             last_temp = self.csv_reader.get_last_raw_temperature(self.file_name)
             last_row = self.csv_reader.get_last_row(self.file_name)
             print "last_row", last_row
-            self.prediction = plstmc.start_predict(self.dict_data.get("model"), self.dict_data.get("last_window"),
+            self.prediction = start_predict(self.dict_data.get("model"), self.dict_data.get("last_window"),
                                                    last_temp, self.file_name, self.is_first_train)
             self.is_first_train = False
             self.prediction = float(self.prediction)
@@ -55,3 +59,26 @@ class SmartPredict(AtomicDEVS):
     def timeAdvance(self):
         return 1.0
 
+
+def start_predict(model, last_window, last_window_raw, filename, first_train):
+    # Predict next time stamp
+    if first_train:
+        csv_reader = CsvReader()
+        new_last_window_raw = csv_reader.get_last_raw_temperature(filename)
+        next_timestamp = predict_next_timestamp(model, last_window)
+        print "last_temprature if", new_last_window_raw
+        next_timestamp_raw = (next_timestamp[0] + 1) * new_last_window_raw
+        return format(next_timestamp_raw)
+    else:
+        next_timestamp = predict_next_timestamp(model, last_window)
+        print "last_temprature else", last_window_raw
+        next_timestamp_raw = (next_timestamp[0] + 1) * last_window_raw
+        return format(next_timestamp_raw)
+
+
+def predict_next_timestamp(model, history):
+    """Predict the next time stamp given a sequence of history data"""
+
+    prediction = model.predict(history)
+    prediction = np.reshape(prediction, (prediction.size,))
+    return prediction
