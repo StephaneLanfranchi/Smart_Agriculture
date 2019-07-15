@@ -9,7 +9,7 @@ class System(CoupledDEVS):
     def __init__(self, name=None):
         CoupledDEVS.__init__(self, name)
 
-        # Load command line arguments
+        # Load data file
         train_file = './data/weather_ajaccio.csv'
 
         self.models = []
@@ -19,7 +19,7 @@ class System(CoupledDEVS):
         self.models.append(self.addSubModel(SmartPredict("_SmartPredict")))
         # Third model
         self.models.append(self.addSubModel(SmartTransition("_SmartTransition")))
-        # And connect them
+        # Connect ouport to inport
         self.connectPorts(self.models[0].outport, self.models[1].inport)
         self.connectPorts(self.models[1].outport, self.models[2].inport)
         self.connectPorts(self.models[2].outport, self.models[0].inport)
@@ -31,6 +31,8 @@ print("Start Simulation")
 smartSystem = System(name="SmartAgriculture")
 sim = Simulator(smartSystem)
 sim.setDSDEVS(True)
+
+# Définie le temps d'éxécution
 sim.setTerminationTime(8)
 sim.setVerbose(None)
 sim.simulate()

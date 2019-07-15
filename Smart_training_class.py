@@ -25,19 +25,24 @@ class SmartTraining(AtomicDEVS):
         self.inport = self.addInPort("IN")
 
     def intTransition(self):
-        # Internal Transition Function
+        """
+        Internal Transition Function
+        """
+
+        # Check if model is train
         if self.is_model_train:
             return State.waiting
         else:
-            print "self.isModelTrain", self.is_model_train
+            # Train model
             self.model, self.last_window, self.last_window_raw = train_predict(self.filename)
             self.is_model_train = True
-            print "le model", self.model
             return [("isTrain", self.is_model_train), ("model", self.model), ("last_window", self.last_window),
                                    ("last_window_raw", self.last_window_raw)]
 
     def outputFnc(self):
-        # Output function to Smart_training_class
+        """
+        Output function of Smart_training_class to Smart_predict_class
+        """
         return {self.outport: [("isTrain", self.is_model_train), ("model", self.model), ("last_window", self.last_window),
                                    ("last_window_raw", self.last_window_raw)]}
 
@@ -46,7 +51,7 @@ class SmartTraining(AtomicDEVS):
 
 
 def train_predict(train_file):
-    # Train and predict time series data
+    """ Train time series data"""
 
     # Load command line arguments
     parameter_file = 'training_config.json'
@@ -137,7 +142,7 @@ def normalize_windows(window_data):
 
 
 def rnn_lstm(layers, params):
-    """Build RNN (LSTM) model on top of Keras"""
+    """Build RNN (LSTM) model"""
 
     model = Sequential()
     model.add(LSTM(input_shape=(layers[1], layers[0]), output_dim=layers[1], return_sequences=True))
